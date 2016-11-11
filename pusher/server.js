@@ -6,8 +6,8 @@ server.listen(8080, function(){
   console.log('listening on *:8080');
 });
 
-server.get('/', function (req, res) {
-  console.log(req.session);
+app.get('/', function (req, res) {
+  res.send('Hello World!');
 });
 
 io.on('connection', function(socket){
