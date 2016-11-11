@@ -23,6 +23,11 @@ var options = {
 	'prefix': 'sess::',
 }
 
+var DEFAULT_RESPONSE = {
+	'status' : false,
+	'msg' : 'error.',
+}
+
 // session middleware 
 app.use(session({
 	name: 'sid',
@@ -36,15 +41,28 @@ server.listen(8080, function(){
 });
 
 app.get('/', function (req, res) {
-	res.send('Hello World!');
+	res.json(DEFAULT_RESPONSE);
 });
 
 app.post('/login', function (req, res) {
 	var username = req.param('username');
 	var password = req.param('password');
+	var response = DEFAULT_RESPONSE
 
-	connection.query('SELECT * FROM user', function(err, rows){
-    	res.render('users', {users : rows});
+	connection.query('SELECT password FROM user', function(err, rows){
+    	if (rows) {
+    		var spassword = rows[0].get('password', null)
+    		if (password === spassword) {
+    			res.session['username'] = rows[0]['username'];
+				response['status'] = true;
+				response['msg'] = 'login successful.';
+				res.json();
+    		} else{
+    			response['status'] = false;
+				response['msg'] = 'username or password is incorrect.';
+				res.json();
+    		}
+    	}
   });
 });
 
