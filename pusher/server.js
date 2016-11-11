@@ -22,7 +22,7 @@ server.listen(8080, function(){
 });
 
 app.get('/', function (req, res) {
-  console.log(req.session);
+  res.send('Hello World!');
 });
 
 io.on('connection', function(socket){
