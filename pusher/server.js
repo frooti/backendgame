@@ -1,12 +1,14 @@
-var app = require('http').createServer(handler)
-var io = require('socket.io')(app);
-var fs = require('fs');
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
-app.listen(8080);
-
-io.on('connection', function (socket) {
-  socket.emit('betstream', [['shubham', '0.01', 'lost'], ['teja', '0.02', 'won']]);
-  socket.on('pot', function (data) {
-    console.log(data);
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
   });
+});
+
+http.listen(8080, function(){
+  console.log('listening on *:3000');
 });
