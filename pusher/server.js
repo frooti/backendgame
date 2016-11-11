@@ -5,6 +5,7 @@ var mysql = require('mysql');
 
 var connection = mysql.createConnection({
   host     : 'satoshidigits-mysql.cbxoxdbgejfz.eu-west-1.rds.amazonaws.com',
+  port	   : 3306,
   user     : 'satoshidigits',
   password : '$shubteja$',
   database : 'satoshidigits'
