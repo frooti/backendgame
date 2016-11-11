@@ -44,16 +44,16 @@ app.get('/', function (req, res) {
 	res.json(DEFAULT_RESPONSE);
 });
 
-app.post('/login', function (req, res) {
+app.get('/login', function (req, res) {
 	var username = req.param('username');
 	var password = req.param('password');
 	var response = DEFAULT_RESPONSE
 
 	connection.query('SELECT password FROM user', function(err, rows){
     	if (rows) {
-    		var spassword = rows[0].get('password', null)
+    		var spassword = rows[0].password;
     		if (password === spassword) {
-    			res.session['username'] = rows[0]['username'];
+    			res.session['username'] = rows[0].username;
 				response['status'] = true;
 				response['msg'] = 'login successful.';
 				res.json();
