@@ -23,10 +23,7 @@ var options = {
 	'prefix': 'sess::',
 }
 
-var DEFAULT_RESPONSE = {
-	'status' : false,
-	'msg' : 'error.',
-}
+var DEFAULT_RESPONSE = '{"status":false,"msg":"error."}';
 
 // session middleware 
 app.use(session({
@@ -41,14 +38,15 @@ server.listen(8080, function(){
 });
 
 app.get('/', function (req, res) {
-	res.json(DEFAULT_RESPONSE);
+	var response = JSON.parse(DEFAULT_RESPONSE);
+	res.json(response);
 });
 
 app.get('/login', function (req, res) {
+	var response = JSON.parse(DEFAULT_RESPONSE);
 	var username = req.param('username');
 	var password = req.param('password');
-	var response = DEFAULT_RESPONSE
-
+	
 	connection.query('SELECT password FROM user', function(err, rows){
     	if (rows) {
     		var spassword = rows[0].password;
@@ -63,6 +61,7 @@ app.get('/login', function (req, res) {
 				res.json();
     		}
     	}
+    	res.json(DEFAULT_RESPONSE);
   });
 });
 
