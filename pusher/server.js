@@ -6,6 +6,10 @@ server.listen(8080, function(){
   console.log('listening on *:8080');
 });
 
+server.get('/', function (req, res) {
+  console.log(req.session);
+});
+
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.on('disconnect', function(){
