@@ -2,5 +2,8 @@
   "name": "pusher",
   "version": "0.0.1",
   "description": "realtime for satoshidigits",
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.14.0",
+    "socketio": "^1.0.0"
+  }
 }
