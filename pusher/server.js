@@ -1,6 +1,9 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var app = require('express').createServer();
+var io = require('socket.io')(app);
+
+app.listen(8080, function(){
+  console.log('listening on *:8080');
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');
@@ -9,6 +12,3 @@ io.on('connection', function(socket){
   });
 });
 
-http.listen(8080, function(){
-  console.log('listening on *:3000');
-});
