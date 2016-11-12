@@ -51,13 +51,13 @@ app.get('/login', function (req, res) {
     	if (rows) {
     		var spassword = rows[0].password;
     		if (password === spassword) {
-    			res.session['username'] = rows[0].username;
-				response['status'] = true;
-				response['msg'] = 'login successful.';
+    			req.session.username = rows[0].username;
+				response.status = true;
+				response.msg = 'login successful.';
 				res.json(response);
     		} else{
-    			response['status'] = false;
-				response['msg'] = 'username or password is incorrect.';
+    			response.status = false;
+				response.msg = 'username or password is incorrect.';
 				res.json(response);
     		}
     	} else {
