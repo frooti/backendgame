@@ -60,8 +60,9 @@ app.get('/login', function (req, res) {
 				response['msg'] = 'username or password is incorrect.';
 				res.json(response);
     		}
-    	}
-    	res.json(DEFAULT_RESPONSE);
+    	} else {
+    		res.json(response);
+		}
   });
 });
 
