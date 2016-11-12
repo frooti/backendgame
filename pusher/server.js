@@ -30,7 +30,7 @@ app.use(session({
 	name: 'sid',
 	store: new RedisStore(options),
 	secret: '$at0shiN@kam0to',
-	cookie: { secure: true, httpOnly: true}
+	cookie: { httpOnly: true}
 }));
 
 server.listen(8080, function(){
