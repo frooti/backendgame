@@ -50,13 +50,13 @@ app.get('/login', function (req, res) {
 	var username = req.param('username');
 	var password = req.param('password');
 	
-	connection.query('SELECT password FROM user', function(err, rows){
+	connection.query('SELECT username, password FROM user', function(err, rows){
     	if (rows) {
     		var spassword = rows[0].password;
     		if (password === spassword) {
     			req.session.username = rows[0].username;
 				response.status = true;
-				response.msg = 'login successful '+JSON.stringify(rows[0]);
+				response.msg = 'login successful';
 				res.json(response);
     		} else{
     			response.status = false;
@@ -72,16 +72,15 @@ app.get('/login', function (req, res) {
 app.get('/logout', function(req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
 	var username = req.session.username;
-	res.json(username);
-
-	// if (username) {
-	// 	req.session.destroy();
-	// 	response.status = true;
-	// 	response.msg = 'logout successful.';
-	// 	res.json(response);
-	// } else {
-	// 	res.json(response);
-	// }
+	
+	if (username) {
+		req.session.destroy();
+		response.status = true;
+		response.msg = 'logout successful.';
+		res.json(response);
+	} else {
+		res.json(response);
+	}
 });
 
 io.on('connection', function(socket){
