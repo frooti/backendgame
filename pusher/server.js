@@ -72,15 +72,16 @@ app.get('/login', function (req, res) {
 app.get('/logout', function(req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
 	var username = req.session.username;
+	res.json(username);
 
-	if (username) {
-		req.session.destroy();
-		response.status = true;
-		response.msg = 'logout successful.';
-		res.json(response);
-	} else {
-		res.json(response);
-	}
+	// if (username) {
+	// 	req.session.destroy();
+	// 	response.status = true;
+	// 	response.msg = 'logout successful.';
+	// 	res.json(response);
+	// } else {
+	// 	res.json(response);
+	// }
 });
 
 io.on('connection', function(socket){
