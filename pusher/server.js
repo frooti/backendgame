@@ -54,11 +54,11 @@ app.get('/login', function (req, res) {
     			res.session['username'] = rows[0].username;
 				response['status'] = true;
 				response['msg'] = 'login successful.';
-				res.json();
+				res.json(response);
     		} else{
     			response['status'] = false;
 				response['msg'] = 'username or password is incorrect.';
-				res.json();
+				res.json(response);
     		}
     	}
     	res.json(DEFAULT_RESPONSE);
