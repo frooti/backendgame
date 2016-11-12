@@ -30,6 +30,9 @@ app.use(session({
 	name: 'sid',
 	store: new RedisStore(options),
 	secret: '$at0shiN@kam0to',
+	rolling: true,
+	resave: true,
+	saveUninitialized: false,
 	cookie: { httpOnly: true}
 }));
 
