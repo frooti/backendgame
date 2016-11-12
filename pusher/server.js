@@ -56,7 +56,7 @@ app.get('/login', function (req, res) {
     		if (password === spassword) {
     			req.session.username = rows[0].username;
 				response.status = true;
-				response.msg = 'login successful.';
+				response.msg = 'login successful '+JSON.stringify(rows[0]);
 				res.json(response);
     		} else{
     			response.status = false;
