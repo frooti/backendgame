@@ -32,7 +32,7 @@ app.use(session({
 	secret: '$at0shiN@kam0to',
 	rolling: true,
 	resave: true,
-	saveUninitialized: false,
+	saveUninitialized: true,
 	cookie: { httpOnly: true}
 }));
 
