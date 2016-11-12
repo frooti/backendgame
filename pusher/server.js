@@ -36,6 +36,13 @@ app.use(session({
 	cookie: { httpOnly: true}
 }));
 
+// post body middleware
+var bodyParser = require('body-parser')
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+
 server.listen(8080, function(){
 	console.log('listening on *:8080');
 });
@@ -45,10 +52,12 @@ app.get('/', function (req, res) {
 	res.json(response);
 });
 
-app.get('/login', function (req, res) {
+// LOGIN //
+
+app.post('/login', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
-	var username = req.param('username');
-	var password = req.param('password');
+	var username = req.body.username;
+	var password = req.body.password;
 	
 	connection.query('SELECT username, password FROM user', function(err, rows){
     	if (rows) {
@@ -81,6 +90,34 @@ app.get('/logout', function(req, res) {
 	} else {
 		res.json(response);
 	}
+});
+
+// SIGNUP
+app.post('/signup', function (req, res) {
+	var response = JSON.parse(DEFAULT_RESPONSE);
+	var username = req.body.username;
+	var password = req.body.password;
+	var email = req.body.email;
+
+	if (username && password && email) {
+		// username check
+ 		connection.query('SELECT username FROM user WHERE username=?', [username], function(err, rows){
+	    	if (rows) {
+	    		response.msg = 'username already exists.';
+	    		res.json(response)
+	    	} else {
+	    		// account creation
+	    		var record = {'username': username, 'password': password, 'email': email};
+	    		connection.query('INSERT INTO user SET ?', record, function(err, res){
+    				response.status = true;
+	    			response.msg = 'account created successfully.';
+	    			res.json(response);
+    			});	    		
+			}
+	  	});
+  	} else {
+  		res.json(response);
+  	}
 });
 
 io.on('connection', function(socket){
