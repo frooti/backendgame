@@ -292,7 +292,7 @@ io.on('connection', function(socket){
 			socket.join(username);
 		}
 
-  		if (username && pot && POTS.contains(pot)) { // transaction
+  		if (username && pot && POTS.indexOf(pot) > -1) { // transaction
   			redisclient.lpop('game::BTC'+pot, function (err, res) {
   				if (res) { // connected
   					var opponent = res;
@@ -340,7 +340,7 @@ io.on('connection', function(socket){
 		var digits = data.digits;
 		var gameid = socket.nickname;
 
-		if (username && digits && DIGITS.contains(digits)) {
+		if (username && digits && _.intersection(DIGITS, digits) === digits) {
 			redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 				if (res.round_status === 'open') { 
 					redisclient.hset('game::'+gameid, username+'digits', JSON.strigify(digits), function (err, res) {
