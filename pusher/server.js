@@ -147,7 +147,7 @@ function closeRound(gameid, round) {
 					io.sockets.in(gameid).emit('roundclosed', {'round': round});
 				});
 			}
-		}
+		});
 	}
 }
 
