@@ -162,7 +162,7 @@ function closeRound(gameid, round) {
 
 // next round
 function nextRound(gameid, username) { // race-conditon/transaction
-	if (gameid, username) {
+	if (gameid && username) {
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
@@ -230,7 +230,7 @@ function getRoundResult(gameid, round) {
 
 // quit game
 function quitGame(gameid, username) { // race-condition/transaction
-	if (gameid, username) {
+	if (gameid && username) {
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
@@ -252,7 +252,7 @@ function quitGame(gameid, username) { // race-condition/transaction
 
 // user disconnected
 function userDisconnected(gameid, username) { // race-condition/transaction
-	if (gameid, username) {
+	if (gameid && username) {
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
