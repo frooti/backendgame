@@ -283,7 +283,7 @@ io.on('connection', function(socket){
   		var pot = data.btc;
   		var username = socket.request.username;
   		// personal room
-		if (socket.rooms.indexOf(username) < 0) {
+		if (io.sockets.adapter.rooms[username]) {
 			socket.join(username);
 		}
 
