@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require('express')
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var mysql = require('mysql');
@@ -58,7 +59,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 
 // static files
-app.use(app.static('static'));
+app.use(express.static('static'));
 
 server.listen(8080, function(){
 	console.log('listening on *:8080');
