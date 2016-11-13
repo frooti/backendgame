@@ -57,6 +57,9 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+// static files
+app.use(express.static('static'));
+
 server.listen(8080, function(){
 	console.log('listening on *:8080');
 });
@@ -68,10 +71,10 @@ app.get('/', function (req, res) {
 
 // LOGIN //
 
-app.post('/login', function (req, res) {
+app.get('/login', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
-	var username = req.body.username;
-	var password = req.body.password;
+	var username = req.param('username'); //req.body.username;
+	var password = req.param('password'); //req.body.password;
 	
 	connection.query('SELECT username, password FROM user', function(err, rows){
     	if (rows) {
