@@ -49,6 +49,8 @@ app.use(sessionMiddleware);
 
 // Use shared session middleware for socket.io
 // setting autoSave:true
+var sharedsession = require("express-socket.io-session");
+
 io.use(sharedsession(sessionMiddleware, {
     autoSave:true
 }));
