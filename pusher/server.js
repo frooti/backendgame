@@ -58,7 +58,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 
 // static files
-app.use(express.static('static'));
+app.use(app.static('static'));
 
 server.listen(8080, function(){
 	console.log('listening on *:8080');
