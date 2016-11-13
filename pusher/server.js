@@ -189,7 +189,8 @@ function getRoundResult(gameid, round) {
 			if (res && res.round === round) {
 				var result = {};
 				var users = JSON.parse(gameid);
-				var user1, user2 = users[0], users[1];
+				var user1 = users[0];
+				var user2 = users[1];
 				var satoshidigits = JSON.parse(res.satoshidigits);
 				var user1digits = res[user1] ? JSON.parse(res[user1]) : [];
 				var user2digits = res[user2] ? JSON.parse(res[user2]) : [];
