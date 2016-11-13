@@ -273,7 +273,7 @@ io.on('connection', function(socket){
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
-		var username = socket.request.username;
+		var username = socket.request.session.username;
 		var gameid = socket.nickname;
 		userDisconnected(gameid, username);
   	});
@@ -281,7 +281,7 @@ io.on('connection', function(socket){
   	// joingame
   	socket.on('joingame', function (data) {
   		var pot = data.btc;
-  		var username = socket.request.username;
+  		var username = socket.request.session.username;
   		// personal room
 		if (io.sockets.adapter.rooms[username]) {
 			socket.join(username);
@@ -331,7 +331,7 @@ io.on('connection', function(socket){
 	
 	// select digits
 	socket.on('selectdigits', function (data) {
-		var username = socket.request.username;
+		var username = socket.request.session.username;
 		var digits = data.digits;
 		var gameid = socket.nickname;
 
@@ -349,21 +349,21 @@ io.on('connection', function(socket){
 
 	// next round
 	socket.on('nextround', function (data) {
-		var username = socket.request.username;
+		var username = socket.request.session.username;
 		var gameid = socket.nickname;
 		nextRound(gameid, username);
 	});
 
 	// quit game
 	socket.on('quitgame', function (data) {
-		var username = socket.request.username;
+		var username = socket.request.session.username;
 		var gameid = socket.nickname;
 		quitGame(gameid, username);
 	});
 
 	// game chat
 	socket.on('gamechat', function (data) {
-		var username = socket.request.username;
+		var username = socket.request.session.username;
 		var gameid = socket.nickname;
 
 		if (username) {
