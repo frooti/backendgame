@@ -292,7 +292,7 @@ io.on('connection', function(socket){
 			socket.join(username);
 		}
 
-  		if (username && pot && POTS.indexOf(pot) > -1) { // transaction
+  		if (username && pot && _.contains(POTS, pot)) { // transaction
   			redisclient.lpop('game::BTC'+pot, function (err, res) {
   				if (res) { // connected
   					var opponent = res;
