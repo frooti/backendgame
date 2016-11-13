@@ -153,7 +153,7 @@ function closeRound(gameid, round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
 			if (res && res.round === round) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
-					io.sockets.in(gameid).emit('roundclosed', {'round': round});
+					io.to(gameid).emit('roundclosed', {'round': round});
 				});
 			}
 		});
@@ -166,27 +166,27 @@ function nextRound(gameid, username) { // race-conditon/transaction
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
-		redisclient.hmget('game::'+gameid, round, round_status, function (err, res) {
-			if (res.round_status === 'closed') {
-				// waiting for opponent to accept
-				redisclient.hset('game::'+gameid, res.round_status, username, function (err, res) {
-					io.sockets.in(opponent).emit('opponentstartednextround');
-				}); 
-			} else if (res.round_status === opponent) {
+		redisclient.hmget('game::'+gameid, 'round', 'round_status', 'result', function (err, res) {
+			if (res.round_status === opponent) {
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
 				var gamepot = {'round': res.round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
 				gamepot[username+'digits'] = JSON.strigify([]);
 				gamepot[opponent+'digits'] = JSON.strigify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
-					io.sockets.in(gameid).emit('roundstarted', {'users': users, 'round': res.round+1});
+					io.to(gameid).emit('roundstarted', {'users': users, 'round': res.round+1});
 					// digits timer
 					setTimeout(closeRound, 30*1000, gameid, res.round+1);
 
 					// result timer
 					setTimeout(getRoundResult, 35*1000, gameid, res.round+1);
 				});				
-			}
+			} else if (res.result) {
+				// waiting for opponent to accept
+				redisclient.hset('game::'+gameid, res.round_status, username, function (err, res) {
+					io.to(opponent).emit('opponentstartednextround');
+				}); 
+			} 
 		});
 	}
 }
@@ -194,7 +194,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 // round result
 function getRoundResult(gameid, round) {
 	if (gameid && round) {
-		redisclient.hget('game::'+gameid, round, function (err, res) {
+		redisclient.hget('game::'+gameid, 'round', function (err, res) {
 			if (res && res.round === round) {
 				var result = {};
 				var users = JSON.parse(gameid);
@@ -220,9 +220,12 @@ function getRoundResult(gameid, round) {
 					result.winner = 'draw';
 				}
 
-				io.in(gameid).emit('roundresult', result);
+				io.to(gameid).emit('roundresult', result);
 				delete result.satoshidigits;
 				io.emit('results', result);
+
+				// result declared
+				redisclient.hset('game::'+gameid, 'result', result.winner, function (err, res) {});
 			}
 		});
 	}
@@ -234,17 +237,18 @@ function quitGame(gameid, username) { // race-condition/transaction
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
-		redisclient.hget('game::'+gameid, round_status, function (err, res) {
-			if (res.round_status !== 'open') {
+		redisclient.hget('game::'+gameid, 'result', function (err, res) {
+			if (res.result) {
 				// quit game
-				redisclient.hdel('game::'+gameid, function (err, res) {
-					io.sockets.in(gameid).emit('gamestopped');
-					// leave room and socket.nickname = undefined
-					io.sockets.clients(someRoom).forEach(function(s){
-    					delete s.nickname;
-    					s.leave(someRoom);
-					});
-				}); 
+				io.to(gameid).emit('gamestopped');
+				// leave room and socket.nickname = undefined
+				io.of('/').in(gameid).clients.forEach(function(s){
+					s.nickname = 0;
+					s.leave(gameid);
+				});
+				// redisclient.hdel('game::'+gameid, function (err, res) {
+					
+				// }); 
 			}
 		});
 	}
@@ -252,29 +256,42 @@ function quitGame(gameid, username) { // race-condition/transaction
 
 // user disconnected
 function userDisconnected(gameid, username) { // race-condition/transaction
-	if (gameid && username) {
+	if (gameid === 0) { // not connected (ignore)
+		// pass
+	} else if (gameid === 1) { // connecting... (deque)
+		var multi = redisclient.multi();
+		POTS.forEach(function (pot) {
+			multi.lrem('game::'+pot, username, 1)
+		});
+		multi.exec(function (err, replies) {
+    		console.log(replies);
+		});
+	} else { // connected (clean)
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
-		redisclient.hget('game::'+gameid, round_status, function (err, res) {
-			if (res.round_status !== 'open') {
-				// disconnected
-				redisclient.hdel('game::'+gameid, function (err, res) {
-					io.sockets.in(gameid).emit('gamestopped', {'disconnected': username});
-					// leave room and socket.nickname = undefined
-					io.sockets.clients(someRoom).forEach(function(s){
-    					delete s.nickname;
-    					s.leave(someRoom);
-					});
-				}); 
-			}
+		io.to(gameid).emit('playerdisconnected', {'username': username});
+		// leave room and socket.nickname = 0
+		io.of('/').in(gameid).clients.forEach(function(s){
+			s.nickname = 0; // not connected
+			s.leave(gameid);
 		});
+
+		// // delete pot data if result declared
+		// redisclient.hget('game::'+gameid, 'result', function (err, res) {
+		// 	if (res.result) { // round result declared
+		// 		redisclient.del('game::'+gameid, function (err, res) {
+					
+		// 		}); 
+		// 	}
+		// });
 	}
 }
 
 
 io.on('connection', function(socket){
 	console.log('a user connected');
+	socket.nickname = 0; // not connected
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
@@ -287,50 +304,54 @@ io.on('connection', function(socket){
   	socket.on('joingame', function (data) {
   		var pot = data.btc;
   		var username = socket.handshake.session.username;
+  		
   		// personal room
-		if (io.sockets.adapter.rooms[username]) {
+		if (username && !io.sockets.adapter.rooms[username]) {
 			socket.join(username);
 		}
 
   		if (username && pot && _.contains(POTS, pot)) { // transaction
-  			redisclient.lpop('game::BTC'+pot, function (err, res) {
-  				if (res) { // connected
-  					var opponent = res;
-  					var gameid = [username, opponent].sort(function(a, b){
-							if(a < b) return -1;
-							if(a > b) return 1;
-							return 0;
+  			if (socket.nickname === 0) { // not connected
+	  			redisclient.lpop('game::BTC'+pot, function (err, res) {
+	  				if (res) { // connected
+	  					var opponent = res;
+	  					var gameid = [username, opponent].sort(function(a, b){
+								if(a < b) return -1;
+								if(a > b) return 1;
+								return 0;
+							});
+	  					gameid = JSON.stringify(gameid);
+
+	  					// join user to game room
+						socket.join(gameid);
+						socket.nickname = gameid; // connected
+						
+						// join opponent to game room
+						var opponentsockets = io.of('/').in(opponent).clients;
+						opponentsockets.forEach(function(s) {
+							s.join(gameid);
+							s.nickname = gameid;
+
 						});
-  					gameid = JSON.stringify(gameid);
 
-  					// join user to game room
-					socket.join(gameid);
-					socket.nickname = gameid;
-					
-					// join opponent to game room
-					var opponentsockets = io.sockets.clients(opponent);
-					opponentsockets.forEach(function(s) {
-						s.join(gameid);
-						s.nickname = gameid;
+						// start first round
+						var satoshidigits = _.sample(DIGITS, 5);
+						var gamepot = {'round': 1, 'value': pot*2, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
 
-					});
+						redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
+							io.to(gameid).emit('gamestarted', {'users': [username, opponent]});
+							// digits timer
+							setTimeout(closeRound, 30*1000, gameid, 1);
 
-					// start first round
-					var satoshidigits = _.sample(DIGITS, 5);
-					var gamepot = {'round': 1, 'value': pot*2, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
-
-					redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
-						io.sockets.in(gameid).emit('gamestarted', {'users': [username, opponent]});
-						// digits timer
-						setTimeout(closeRound, 30*1000, gameid, 1);
-
-						// result timer
-						setTimeout(getRoundResult, 35*1000, gameid, 1);
-					});
-				} else {   // enqueue
-  					redisclient.rpush('game::BTC'+pot, username);
-  				}
-  			});
+							// result timer
+							setTimeout(getRoundResult, 35*1000, gameid, 1);
+						});
+					} else {   // enqueue
+						socket.nickname = 1; // connecting
+	  					redisclient.rpush('game::BTC'+pot, username);
+	  				}
+	  			});
+			}
 		}
 	});
 	
@@ -341,14 +362,16 @@ io.on('connection', function(socket){
 		var gameid = socket.nickname;
 
 		if (username && digits && _.intersection(DIGITS, digits) === digits) {
-			redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
-				if (res.round_status === 'open') { 
-					redisclient.hset('game::'+gameid, username+'digits', JSON.strigify(digits), function (err, res) {
-						socket.emit('selecteddigits', {'digits': digits});
-						socket.broadcast.to(gameid).emit('opponentselecteddigits', {'digits': digits});
-					});
-				}
-			});
+			if (_.isString(gameid)) { // connected
+				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
+					if (res.round_status === 'open') { 
+						redisclient.hset('game::'+gameid, username+'digits', JSON.strigify(digits), function (err, res) {
+							socket.emit('selecteddigits', {'digits': digits}); // ack
+							io.to(gameid).emit('opponentselecteddigits', {'digits': digits});
+						});
+					}
+				});
+			}
 		}
 	});
 
@@ -371,7 +394,7 @@ io.on('connection', function(socket){
 		var username = socket.handshake.session.username;
 		var gameid = socket.nickname;
 
-		if (username) {
+		if (username && _.isString(gameid)) { // connected
 			socket.broadcast.to(gameid).emit('gamechat', data);
 		}
 	});	
