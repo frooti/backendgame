@@ -166,7 +166,9 @@ function nextRound(gameid, username) { // race-conditon/transaction
 			} else if (res.round_status === opponent) {
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
-				var gamepot = {'round': res.round+1, username+'digits', JSON.strigify([]), opponent+'digits', JSON.strigify([]), 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
+				var gamepot = {'round': res.round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
+				gamepot[username+'digits'] = JSON.strigify([]);
+				gamepot[opponent+'digits'] = JSON.strigify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
 					io.sockets.in(gameid).emit('roundstarted', {'users': users, 'round': res.round+1});
 					// digits timer
