@@ -34,7 +34,7 @@ var options = {
 var DEFAULT_RESPONSE = '{"status":false,"msg":"error."}';
 
 // session middleware 
-app.use(session({
+var sessionMiddleware = session({
 	name: 'sid',
 	store: new RedisStore(options),
 	secret: '$at0shiN@kam0to',
@@ -42,7 +42,13 @@ app.use(session({
 	resave: true,
 	saveUninitialized: true,
 	cookie: { httpOnly: true}
-}));
+});
+
+io.use(function(socket, next) {
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
+
+app.use(sessionMiddleware);
 
 // post body middleware
 var bodyParser = require('body-parser')
@@ -134,7 +140,7 @@ var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 // close round
 function closeRound(gameid, round) {
-	if (gameid and round) {
+	if (gameid && round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
 			if (res && res.round === round) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
@@ -176,7 +182,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 
 // round result
 function getRoundResult(gameid, round) {
-	if (gameid and round) {
+	if (gameid && round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
 			if (res && res.round === round) {
 				var result = {};
@@ -259,7 +265,7 @@ io.on('connection', function(socket){
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
-		var username = ''; // from session
+		var username = socket.request.username;
 		var gameid = socket.nickname;
 		userDisconnected(gameid, username);
   	});
@@ -267,7 +273,7 @@ io.on('connection', function(socket){
   	// joingame
   	socket.on('joingame', function (data) {
   		var pot = data.btc;
-  		var username = data.username; // from session
+  		var username = socket.request.username;
   		// personal room
 		if (socket.rooms.indexOf(username) < 0) {
 			socket.join(username);
@@ -317,7 +323,7 @@ io.on('connection', function(socket){
 	
 	// select digits
 	socket.on('selectdigits', function (data) {
-		var username = data.username; // from session
+		var username = socket.request.username;
 		var digits = data.digits;
 		var gameid = socket.nickname;
 
@@ -335,21 +341,21 @@ io.on('connection', function(socket){
 
 	// next round
 	socket.on('nextround', function (data) {
-		var username = data.username; // from session
+		var username = socket.request.username;
 		var gameid = socket.nickname;
 		nextRound(gameid, username);
 	});
 
 	// quit game
 	socket.on('quitgame', function (data) {
-		var username = data.username; // from session
+		var username = socket.request.username;
 		var gameid = socket.nickname;
 		quitGame(gameid, username);
 	});
 
 	// game chat
 	socket.on('gamechat', function (data) {
-		var username = data.username; // from session
+		var username = socket.request.username;
 		var gameid = socket.nickname;
 
 		if (username) {
