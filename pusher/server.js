@@ -188,7 +188,8 @@ function getRoundResult(gameid, round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
 			if (res && res.round === round) {
 				var result = {};
-				var [user1, user2] = JSON.parse(gameid);
+				var users = JSON.parse(gameid);
+				var user1, user2 = users[0], users[1];
 				var satoshidigits = JSON.parse(res.satoshidigits);
 				var user1digits = res[user1] ? JSON.parse(res[user1]) : [];
 				var user2digits = res[user2] ? JSON.parse(res[user2]) : [];
