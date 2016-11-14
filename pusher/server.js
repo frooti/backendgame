@@ -202,8 +202,8 @@ function getRoundResult(gameid, round) {
 				var user1 = users[0];
 				var user2 = users[1];
 				var satoshidigits = JSON.parse(res.satoshidigits);
-				var user1digits = res[user1] ? JSON.parse(res[user1]) : [];
-				var user2digits = res[user2] ? JSON.parse(res[user2]) : [];
+				var user1digits = res[user1+'digits'] ? JSON.parse(res[user1]) : [];
+				var user2digits = res[user2+'digits'] ? JSON.parse(res[user2]) : [];
 				var potvalue = parseFloat(res.value);
 
 				result.users = [user1, user2];
@@ -388,7 +388,7 @@ io.on('connection', function(socket){
 					if (res === 'open') { 
 						redisclient.hset('game::'+gameid, username+'digits', JSON.stringify(digits), function (err, res) {
 							socket.emit('selecteddigits', {'digits': digits}); // ack
-							io.to(gameid).emit('opponentselecteddigits', {'digits': digits});
+							socket.broadcast.to(gameid).emit('opponentselecteddigits', {'digits': digits});
 						});
 					}
 				});
