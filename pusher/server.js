@@ -243,7 +243,7 @@ function quitGame(gameid, username) { // race-condition/transaction
 			if (res.result) {
 				// quit game
 				io.to(gameid).emit('gamestopped');
-				// leave room and socket.nickname = undefined
+				// leave room and socket.handshake.session.gameid = undefined
 
 				var gamesockets = getAllRoomMembers(gameid);
 				gamesockets.forEach(function(s){
@@ -271,17 +271,17 @@ function userDisconnected(gameid, username) { // race-condition/transaction
     		console.log(replies);
 		});
 	} else { // connected (clean)
-		var users = JSON.parse(gameid);
-		var opponent = _.difference(users, [username])[0];
+		// var users = JSON.parse(gameid);
+		// var opponent = _.difference(users, [username])[0];
 
-		io.to(gameid).emit('playerdisconnected', {'username': username});
-		// leave room and socket.nickname = 0
+		// io.to(gameid).emit('playerdisconnected', {'username': username});
+		// // leave room and socket.handshake.session.gameid = 0
 
-		var gamesockets = getAllRoomMembers(gameid); 
-		gamesockets.forEach(function(s){
-			s.nickname = 0; // not connected
-			s.leave(gameid);
-		});
+		// var gamesockets = getAllRoomMembers(gameid); 
+		// gamesockets.forEach(function(s){
+		// 	s.nickname = 0; // not connected
+		// 	s.leave(gameid);
+		// });
 
 		// // delete pot data if result declared
 		// redisclient.hget('game::'+gameid, 'result', function (err, res) {
@@ -311,12 +311,12 @@ function getAllRoomMembers(room, _nsp) {
 
 io.on('connection', function(socket){
 	console.log('a user connected');
-	socket.nickname = 0; // not connected
+	socket.handshake.session.gameid = 0; // not connected
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
 		var username = socket.handshake.session.username;
-		var gameid = socket.nickname;
+		var gameid = socket.handshake.session.gameid;
 		userDisconnected(gameid, username);
   	});
 
@@ -331,7 +331,7 @@ io.on('connection', function(socket){
 		}
 
   		if (username && pot && _.contains(POTS, pot)) { // transaction
-  			if (socket.nickname === 0) { // not connected
+  			if (socket.handshake.session.gameid === 0) { // not connected
 	  			redisclient.lpop('game::BTC'+pot, function (err, res) {
 	  				if (res) { // connected
 	  					var opponent = res;
@@ -344,7 +344,7 @@ io.on('connection', function(socket){
 
 	  					// join user to game room
 						socket.join(gameid);
-						socket.nickname = gameid; // connected
+						socket.handshake.session.gameid = gameid; // connected
 						
 						// join opponent to game room
 						var opponentsockets = getAllRoomMembers(opponent);
@@ -368,7 +368,7 @@ io.on('connection', function(socket){
 							setTimeout(getRoundResult, 35*1000, gameid, 1);
 						});
 					} else {   // enqueue
-						socket.nickname = 1; // connecting
+						socket.handshake.session.gameid = 1; // connecting
 	  					redisclient.rpush('game::BTC'+pot, username);
 	  				}
 	  			});
@@ -380,7 +380,7 @@ io.on('connection', function(socket){
 	socket.on('selectdigits', function (data) {
 		var username = socket.handshake.session.username;
 		var digits = data.digits;
-		var gameid = socket.nickname;
+		var gameid = socket.handshake.session.gameid;
 
 		if (username && digits && _.isEqual(_.intersection(DIGITS, digits), digits)) {
 			if (_.isString(gameid)) { // connected
@@ -399,21 +399,21 @@ io.on('connection', function(socket){
 	// next round
 	socket.on('nextround', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.nickname;
+		var gameid = socket.handshake.session.gameid;
 		nextRound(gameid, username);
 	});
 
 	// quit game
 	socket.on('quitgame', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.nickname;
+		var gameid = socket.handshake.session.gameid;
 		quitGame(gameid, username);
 	});
 
 	// game chat
 	socket.on('gamechat', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.nickname;
+		var gameid = socket.handshake.session.gameid;
 
 		if (username && _.isString(gameid)) { // connected
 			socket.broadcast.to(gameid).emit('gamechat', data);
