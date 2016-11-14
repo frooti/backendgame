@@ -345,6 +345,7 @@ io.on('connection', function(socket){
 						
 						// join opponent to game room
 						var opponentsockets = getAllRoomMembers(opponent);
+						console.log(opponentsockets);
 						opponentsockets.forEach(function(s) {
 							s.join(gameid);
 							s.nickname = gameid;
