@@ -223,7 +223,6 @@ function getRoundResult(gameid, round) {
 
 				// result declared
 				redisclient.hset('game::'+gameid, 'result', result.winner, function (err, res) {
-					console.log('result::'+result.winner);
 					io.to(gameid).emit('roundresult', result);
 					delete result.satoshidigits;
 					io.emit('results', result);
@@ -349,14 +348,12 @@ io.on('connection', function(socket){
 						
 						// join opponent to game room
 						var opponentsockets = getAllRoomMembers(opponent);
-						console.log(opponentsockets);
+						
 						opponentsockets.forEach(function(s) {
 							s.join(gameid);
 							s.nickname = gameid;
 
 						});
-
-						console.log(getAllRoomMembers(gameid).length);
 
 						// start first round
 						var satoshidigits = _.sample(DIGITS, 5);
