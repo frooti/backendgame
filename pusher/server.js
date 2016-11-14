@@ -94,24 +94,32 @@ app.post('/login', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
 	var username = req.body.username;
 	var password = req.body.password;
-	
-	connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
-    	if (rows) {
-    		var spassword = rows[0].password;
-    		if (password === spassword) {
-    			req.session.username = username;
-				response.status = true;
-				response.msg = 'login successful';
-				res.json(response);
-    		} else{
-    			response.status = false;
-				response.msg = 'username or password is incorrect.';
-				res.json(response);
-    		}
-    	} else {
-    		res.json(response);
-		}
-  });
+
+	if (req.session.username) {
+		response.status = true;
+		response.msg = 'login successful';
+		response.username = req.session.username;
+
+		res.json(response);
+	} else {
+		connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
+	    	if (rows) {
+	    		var spassword = rows[0].password;
+	    		if (password === spassword) {
+	    			req.session.username = username;
+					response.status = true;
+					response.msg = 'login successful';
+					res.json(response);
+	    		} else{
+	    			response.status = false;
+					response.msg = 'username or password is incorrect.';
+					res.json(response);
+	    		}
+	    	} else {
+	    		res.json(response);
+			}
+	  	});
+	 }
 });
 
 app.get('/logout', function(req, res) {
