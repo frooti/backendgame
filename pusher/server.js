@@ -82,11 +82,11 @@ app.get('/login', function (req, res) {
 	var username = req.param('username'); //req.body.username;
 	var password = req.param('password'); //req.body.password;
 	
-	connection.query('SELECT username, password FROM user', function(err, rows){
+	connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
     	if (rows) {
     		var spassword = rows[0].password;
     		if (password === spassword) {
-    			req.session.username = rows[0].username;
+    			req.session.username = username;
 				response.status = true;
 				response.msg = 'login successful';
 				res.json(response);
