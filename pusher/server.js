@@ -151,7 +151,7 @@ var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 function closeRound(gameid, round) {
 	if (gameid && round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
-			if (res && res.round === round) {
+			if (res && res.round === parseInt(round) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
 					io.to(gameid).emit('roundclosed', {'round': round});
 				});
@@ -195,7 +195,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 function getRoundResult(gameid, round) {
 	if (gameid && round) {
 		redisclient.hget('game::'+gameid, 'round', function (err, res) {
-			if (res && res.round === round) {
+			if (res && res.round === parseInt(round)) {
 				var result = {};
 				var users = JSON.parse(gameid);
 				var user1 = users[0];
@@ -203,7 +203,7 @@ function getRoundResult(gameid, round) {
 				var satoshidigits = JSON.parse(res.satoshidigits);
 				var user1digits = res[user1] ? JSON.parse(res[user1]) : [];
 				var user2digits = res[user2] ? JSON.parse(res[user2]) : [];
-				var potvalue = res.value;
+				var potvalue = parseInt(res.value);
 
 				result.users = [user1, user2];
 				result.potvalue = potvalue;
