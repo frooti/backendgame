@@ -170,16 +170,17 @@ function nextRound(gameid, username) { // race-conditon/transaction
 			if (res.round_status === opponent) {
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
-				var gamepot = {'round': res.round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
+				var round = parseInt(res.round);
+				var gamepot = {'round': round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
 				gamepot[username+'digits'] = JSON.strigify([]);
 				gamepot[opponent+'digits'] = JSON.strigify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
-					io.to(gameid).emit('roundstarted', {'users': users, 'round': res.round+1});
+					io.to(gameid).emit('roundstarted', {'users': users, 'round': round+1});
 					// digits timer
-					setTimeout(closeRound, 30*1000, gameid, res.round+1);
+					setTimeout(closeRound, 30*1000, gameid, round+1);
 
 					// result timer
-					setTimeout(getRoundResult, 35*1000, gameid, res.round+1);
+					setTimeout(getRoundResult, 35*1000, gameid, round+1);
 				});				
 			} else if (res.result) {
 				// waiting for opponent to accept
