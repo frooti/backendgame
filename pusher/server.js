@@ -90,10 +90,10 @@ app.get('/', function (req, res) {
 
 // LOGIN //
 
-app.get('/login', function (req, res) {
+app.post('/login', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
-	var username = req.param('username'); //req.body.username;
-	var password = req.param('password'); //req.body.password;
+	var username = req.body.username;
+	var password = req.body.password;
 	
 	connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
     	if (rows) {
