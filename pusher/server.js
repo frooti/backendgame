@@ -150,8 +150,8 @@ var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 // close round
 function closeRound(gameid, round) {
 	if (gameid && round) {
-		redisclient.hget('game::'+gameid, round, function (err, res) {
-			console.log('game::'+gameid);
+		redisclient.hget('game::'+gameid, 'round', function (err, res) {
+			console.log(res);
 			if (res && parseInt(res.round) === parseInt(round)) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
 					io.to(gameid).emit('roundclosed', {'round': round});
@@ -222,12 +222,14 @@ function getRoundResult(gameid, round) {
 					result.winner = 'draw';
 				}
 
-				io.to(gameid).emit('roundresult', result);
-				delete result.satoshidigits;
-				io.emit('results', result);
-
 				// result declared
-				redisclient.hset('game::'+gameid, 'result', result.winner, function (err, res) {});
+				redisclient.hset('game::'+gameid, 'result', result.winner, function (err, res) {
+					console.log('result::'+result.winner);
+					io.to(gameid).emit('roundresult', result);
+					delete result.satoshidigits;
+					io.emit('results', result);
+				});
+
 			}
 		});
 	}
