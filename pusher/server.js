@@ -323,8 +323,7 @@ io.on('connection', function(socket){
   		var username = socket.handshake.session.username;
   		
   		// personal room
-		if (username && !getAllRoomMembers(username)) {
-			console.log('room::'+username);
+		if (username && getAllRoomMembers(username).length <= 0) {
 			socket.join(username);
 		}
 
