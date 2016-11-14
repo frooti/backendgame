@@ -204,7 +204,7 @@ function getRoundResult(gameid, round) {
 				var satoshidigits = JSON.parse(res.satoshidigits);
 				var user1digits = res[user1] ? JSON.parse(res[user1]) : [];
 				var user2digits = res[user2] ? JSON.parse(res[user2]) : [];
-				var potvalue = parseInt(res.value);
+				var potvalue = parseFloat(res.value);
 
 				result.users = [user1, user2];
 				result.potvalue = potvalue;
