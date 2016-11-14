@@ -324,6 +324,7 @@ io.on('connection', function(socket){
   		
   		// personal room
 		if (username && !getAllRoomMembers(username)) {
+			console.log('room::'+username);
 			socket.join(username);
 		}
 
