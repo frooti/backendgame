@@ -246,7 +246,7 @@ function quitGame(gameid, username) { // race-condition/transaction
 				var gamesockets = getAllRoomMembers(gameid);
 				gamesockets.forEach(function(s){
 					s.nickname = 0;
-					s.leave(gameidd);
+					s.leave(gameid);
 				});
 				// redisclient.hdel('game::'+gameid, function (err, res) {
 					
@@ -263,7 +263,7 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 	} else if (gameid === 1) { // connecting... (deque)
 		var multi = redisclient.multi();
 		POTS.forEach(function (pot) {
-			multi.lrem('game::'+pot, 1, username);
+			multi.lrem('game::BTC'+pot, 1, username);
 		});
 		multi.exec(function (err, replies) {
     		console.log(replies);
