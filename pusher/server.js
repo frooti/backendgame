@@ -151,8 +151,7 @@ var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 function closeRound(gameid, round) {
 	if (gameid && round) {
 		redisclient.hget('game::'+gameid, 'round', function (err, res) {
-			console.log(res);
-			if (res && parseInt(res.round) === parseInt(round)) {
+			if (res && parseInt(res) === parseInt(round)) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
 					io.to(gameid).emit('roundclosed', {'round': round});
 				});
@@ -196,7 +195,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 // round result
 function getRoundResult(gameid, round) {
 	if (gameid && round) {
-		redisclient.hget('game::'+gameid, 'round', function (err, res) {
+		redisclient.hgetall('game::'+gameid, function (err, res) {
 			if (res && parseInt(res.round) === parseInt(round)) {
 				var result = {};
 				var users = JSON.parse(gameid);
