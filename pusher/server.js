@@ -300,8 +300,12 @@ function getAllRoomMembers(room, _nsp) {
 	var roomMembers = [];
 	var nsp = (typeof _nsp !== 'string') ? '/' : _nsp;
 
-	for(var member in io.nsps[nsp].adapter.rooms[room]['sockets']) {
-        roomMembers.push(member);
+	if (io.nsps[nsp].adapter.rooms[room]) {
+		for(var sid in io.nsps[nsp].adapter.rooms[room].sockets) {
+	        if (io.sockets.connected[sid]) {
+	        	roomMembers.push(io.sockets.connected[sid]);
+	    	}
+	    }
     }
     return roomMembers;
 }
