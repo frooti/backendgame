@@ -351,6 +351,8 @@ io.on('connection', function(socket){
 
 						});
 
+						console.log(getAllRoomMembers(gameid).length);
+
 						// start first round
 						var satoshidigits = _.sample(DIGITS, 5);
 						var gamepot = {'round': 1, 'value': pot*2, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
