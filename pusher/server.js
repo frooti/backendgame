@@ -382,7 +382,7 @@ io.on('connection', function(socket){
 		var digits = data.digits;
 		var gameid = socket.nickname;
 
-		if (username && digits && isEqual(_.intersection(DIGITS, digits), digits)) {
+		if (username && digits && _.isEqual(_.intersection(DIGITS, digits), digits)) {
 			if (_.isString(gameid)) { // connected
 				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 					if (res === 'open') { 
