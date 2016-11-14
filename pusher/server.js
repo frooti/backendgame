@@ -386,7 +386,7 @@ io.on('connection', function(socket){
 			if (_.isString(gameid)) { // connected
 				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 					if (res === 'open') { 
-						redisclient.hset('game::'+gameid, username+'digits', JSON.strigify(digits), function (err, res) {
+						redisclient.hset('game::'+gameid, username+'digits', JSON.stringify(digits), function (err, res) {
 							socket.emit('selecteddigits', {'digits': digits}); // ack
 							io.to(gameid).emit('opponentselecteddigits', {'digits': digits});
 						});
