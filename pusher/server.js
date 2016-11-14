@@ -21,6 +21,19 @@ var redis = require("redis");
 var redisclient = redis.createClient(port=6379, host='satoshidigits-redis.sjvvfh.0001.euw1.cache.amazonaws.com');
 
 
+// CORS
+var cors = require('cors')
+
+var whitelist = ['http://localhost'];
+var corsOptions = {
+  origin: function(origin, callback){
+    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
+  }
+};
+
+app.use(cors());
+
 // SESSION STORE
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
