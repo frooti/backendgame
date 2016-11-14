@@ -152,6 +152,7 @@ function closeRound(gameid, round) {
 	if (gameid && round) {
 		redisclient.hget('game::'+gameid, round, function (err, res) {
 			if (res && parseInt(res.round) === parseInt(round)) {
+			console.log('game::'+gameid+'::'+'round::'+round);
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
 					io.to(gameid).emit('roundclosed', {'round': round});
 				});
