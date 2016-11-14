@@ -242,9 +242,11 @@ function quitGame(gameid, username) { // race-condition/transaction
 				// quit game
 				io.to(gameid).emit('gamestopped');
 				// leave room and socket.nickname = undefined
-				io.of('/').in(gameid).clients.forEach(function(s){
+
+				var gamesockets = getAllRoomMembers(gameid);
+				gamesockets.forEach(function(s){
 					s.nickname = 0;
-					s.leave(gameid);
+					s.leave(gameidd);
 				});
 				// redisclient.hdel('game::'+gameid, function (err, res) {
 					
@@ -261,7 +263,7 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 	} else if (gameid === 1) { // connecting... (deque)
 		var multi = redisclient.multi();
 		POTS.forEach(function (pot) {
-			multi.lrem('game::'+pot, username, 1)
+			multi.lrem('game::'+pot, 1, username);
 		});
 		multi.exec(function (err, replies) {
     		console.log(replies);
@@ -272,7 +274,9 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 
 		io.to(gameid).emit('playerdisconnected', {'username': username});
 		// leave room and socket.nickname = 0
-		io.of('/').in(gameid).clients.forEach(function(s){
+
+		var gamesockets = getAllRoomMembers(gameid); 
+		gamesockets.forEach(function(s){
 			s.nickname = 0; // not connected
 			s.leave(gameid);
 		});
@@ -288,6 +292,16 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 	}
 }
 
+
+function getAllRoomMembers(room, _nsp) {
+	var roomMembers = [];
+	var nsp = (typeof _nsp !== 'string') ? '/' : _nsp;
+
+	for(var member in io.nsps[nsp].adapter.rooms[room]) {
+        roomMembers.push(member);
+    }
+    return roomMembers;
+}
 
 io.on('connection', function(socket){
 	console.log('a user connected');
@@ -306,7 +320,7 @@ io.on('connection', function(socket){
   		var username = socket.handshake.session.username;
   		
   		// personal room
-		if (username && !io.sockets.adapter.rooms[username]) {
+		if (username && !getAllRoomMembers(username)) {
 			socket.join(username);
 		}
 
@@ -327,7 +341,7 @@ io.on('connection', function(socket){
 						socket.nickname = gameid; // connected
 						
 						// join opponent to game room
-						var opponentsockets = io.of('/').in(opponent).clients;
+						var opponentsockets = getAllRoomMembers(opponent);
 						opponentsockets.forEach(function(s) {
 							s.join(gameid);
 							s.nickname = gameid;
