@@ -452,7 +452,7 @@ io.on('connection', function(socket){
 		var gameid = socket.nickname; // socket.handshake.session.gameid;
 		console.log('selecteddigits::username::'+username+'::digits::'+digits);
 
-		if (username && digits && _.isEqual(_.intersection(DIGITS, digits), digits)) {
+		if (username && digits && _.difference(_.intersection(DIGITS, digits), digits).length == 0) {
 			if (_.isString(gameid)) { // connected
 				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 					if (res === 'open') { 
