@@ -1,9 +1,14 @@
 var express = require('express')
+var httpsRedirect = require('express-https-redirect');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var mysql = require('mysql');
 var _ = require('underscore');
+
+
+
+app.use(httpsRedirect());
 
 // MYSQL
 var connection = mysql.createConnection({
