@@ -449,6 +449,7 @@ io.on('connection', function(socket){
 		var username = socket.handshake.session.username;
 		var digits = data.digits;
 		var gameid = socket.nickname; // socket.handshake.session.gameid;
+		console.log('selecteddigits::username::'+username+'::digits::'+digits);
 
 		if (username && digits && _.isEqual(_.intersection(DIGITS, digits), digits)) {
 			if (_.isString(gameid)) { // connected
