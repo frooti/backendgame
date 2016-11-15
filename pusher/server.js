@@ -145,6 +145,7 @@ app.post('/login', function (req, res) {
 	    			req.session.username = username;
 					response.status = true;
 					response.msg = 'login successful';
+					response.username = username;
 					res.json(response);
 	    		} else{
 	    			response.status = false;
