@@ -132,7 +132,7 @@ app.post('/login', function (req, res) {
 		response.username = req.session.username;
 
 		res.json(response);
-	} else {
+	} else if (username && password) {
 		connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
 	    	if (rows.length > 0) {
 	    		var spassword = rows[0].password;
