@@ -59,7 +59,7 @@ var sessionMiddleware = session({
 	rolling: true,
 	resave: true,
 	saveUninitialized: true,
-	cookie: { httpOnly: true}
+	cookie: { httpOnly: true. secure: true}
 });
 
 app.use(sessionMiddleware);
