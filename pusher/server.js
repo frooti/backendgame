@@ -68,6 +68,12 @@ io.use(sharedsession(sessionMiddleware, {
     autoSave:true
 }));
 
+io.use(function(socket, next){
+    handshake.headers.cookie = 'test'+"="+'test'+"; path=/";
+    next();
+});
+
+
 
 // post body middleware
 var bodyParser = require('body-parser')
