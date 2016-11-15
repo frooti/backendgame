@@ -26,7 +26,7 @@ var cors = require('cors')
 
 var whitelist = ['https://satoshidigits.com'];
 var corsOptions = {
-	origin: 'satoshidigits.com',
+	origin: 'https://satoshidigits.com',
 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   	credentials: true
 };
