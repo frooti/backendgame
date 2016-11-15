@@ -272,7 +272,7 @@ function getRoundResult(gameid, round) {
 				} else if (user1matched.length < user2matched.length) {
 					result.winner = user2;
 				} else {
-					result.winner = 'draw';
+					result.draw = true;
 				}
 
 				// result declared
