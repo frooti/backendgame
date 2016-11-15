@@ -246,7 +246,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 				gamepot[username+'digits'] = JSON.stringify([]);
 				gamepot[opponent+'digits'] = JSON.stringify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
-					io.to(gameid).emit('roundstarted', {'users': users, 'round': round+1});
+					io.to(gameid).emit('nextroundstarted', {'users': users, 'round': round+1});
 					// digits timer
 					setTimeout(closeRound, 30*1000, gameid, round+1);
 
