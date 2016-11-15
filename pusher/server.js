@@ -365,6 +365,7 @@ function getAllRoomMembers(room, _nsp) {
 io.on('connection', function(socket){
 	console.log('a user connected');
 	socket.handshake.session.gameid = 0; // not connected
+	socket.handshake.session.save();
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
@@ -399,6 +400,7 @@ io.on('connection', function(socket){
 		  					// join user to game room
 							socket.join(gameid);
 							socket.handshake.session.gameid = gameid; // connected
+							socket.handshake.session.save();
 							
 							// join opponent to game room
 							var opponentsockets = getAllRoomMembers(opponent);
@@ -423,6 +425,7 @@ io.on('connection', function(socket){
 							});
 						} else {   // enqueue
 							socket.handshake.session.gameid = 1; // connecting
+							socket.handshake.session.save();
 		  					redisclient.rpush('game::BTC'+pot, username);
 		  				}
 		  			});				
