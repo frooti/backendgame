@@ -27,7 +27,7 @@ var redisclient = redis.createClient(port=6379, host='satoshidigits-redis.sjvvfh
 
 
 // CORS
-var cors = require('cors')
+var cors = require('cors');
 
 var whitelist = ['https://satoshidigits.com'];
 var corsOptions = {
@@ -37,6 +37,14 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// HELMET
+var helmet = require('helmet');
+app.use(helmet());
+
+// CAJA - HTML sanitizer
+var sanitizer = require('sanitizer');
+
 
 // SESSION STORE
 var session = require('express-session');
@@ -59,7 +67,7 @@ var sessionMiddleware = session({
 	rolling: true,
 	resave: true,
 	saveUninitialized: true,
-	cookie: { httpOnly: true}
+	cookie: { httpOnly: true, secure: true, domain: 'api.satoshidigits.com'}
 });
 
 app.use(sessionMiddleware);
@@ -142,10 +150,10 @@ app.post('/login', function (req, res) {
 	    	if (rows.length > 0) {
 	    		var spassword = rows[0].password;
 	    		if (password === spassword) {
-	    			req.session.username = username;
+	    			req.session.username = sanitizer.escape(username);
 					response.status = true;
 					response.msg = 'login successful';
-					response.username = username;
+					response.username = sanitizer.escape(username);
 					res.json(response);
 	    		} else{
 	    			response.status = false;
@@ -499,8 +507,11 @@ io.on('connection', function(socket){
 		var username = socket.handshake.session.username;
 		var gameid = socket.nickname; // socket.handshake.session.gameid;
 
+		// sanitize
+		var msg = sanitizer.escape(data.msg);
+
 		if (username && _.isString(gameid)) { // connected
-			socket.broadcast.to(gameid).emit('gamechat', data);
+			socket.broadcast.to(gameid).emit('gamechat', {'msg': msg});
 		}
 	});	
 });
