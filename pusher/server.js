@@ -92,8 +92,8 @@ app.get('/', function (req, res) {
 });
 
 // HELMET
-var helmet = require('helmet');
-app.use(helmet());
+// var helmet = require('helmet');
+// app.use(helmet());
 
 // CAJA - HTML sanitizer
 var sanitizer = require('sanitizer');
