@@ -213,7 +213,7 @@ function onlineUsers() {
 	var online = Object.keys(io.sockets.sockets).length;
 	io.emit('online', {'count':online});
 }
-setTimeout(onlineUsers, 30*1000);
+setInterval(onlineUsers, 30*1000);
 
 // close round
 function closeRound(gameid, round) {
@@ -243,8 +243,8 @@ function nextRound(gameid, username) { // race-conditon/transaction
 				var satoshidigits = _.sample(DIGITS, 5);
 				var round = parseInt(res.round);
 				var gamepot = {'round': round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
-				gamepot[username+'digits'] = JSON.strigify([]);
-				gamepot[opponent+'digits'] = JSON.strigify([]);
+				gamepot[username+'digits'] = JSON.stringify([]);
+				gamepot[opponent+'digits'] = JSON.stringify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
 					io.to(gameid).emit('roundstarted', {'users': users, 'round': round+1});
 					// digits timer
