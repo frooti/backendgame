@@ -235,10 +235,9 @@ function nextRound(gameid, username) { // race-conditon/transaction
 		var users = JSON.parse(gameid);
 		var opponent = _.difference(users, [username])[0];
 
-		console.log('nextround::'+opponent);
-
 		redisclient.hmget('game::'+gameid, 'round', 'round_status', 'result', function (err, res) {
-			console.log(res);
+			var res = {'round':res[0],'round_status':res[1],'result':res[2]};
+
 			if (res.round_status === opponent) {
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
