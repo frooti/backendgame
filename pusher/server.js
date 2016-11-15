@@ -343,58 +343,60 @@ io.on('connection', function(socket){
 
   	// joingame
   	socket.on('joingame', function (data) {
-  		var pot = data.btc;
-  		var username = socket.handshake.session.username;
-  		
-  		// personal room
-		if (username && getAllRoomMembers(username).length <= 0) {
-			socket.join(username);
-		}
-
-  		if (username && pot && _.contains(POTS, pot)) { // transaction
-  			if (socket.handshake.session.gameid === 0) { // not connected
-	  			redisclient.lpop('game::BTC'+pot, function (err, res) {
-	  				if (res) { // connected
-	  					var opponent = res;
-	  					var gameid = [username, opponent].sort(function(a, b){
-								if(a < b) return -1;
-								if(a > b) return 1;
-								return 0;
-							});
-	  					gameid = JSON.stringify(gameid);
-
-	  					// join user to game room
-						socket.join(gameid);
-						socket.handshake.session.gameid = gameid; // connected
-						
-						// join opponent to game room
-						var opponentsockets = getAllRoomMembers(opponent);
-						
-						opponentsockets.forEach(function(s) {
-							s.join(gameid);
-							s.nickname = gameid;
-
-						});
-
-						// start first round
-						var satoshidigits = _.sample(DIGITS, 5);
-						var gamepot = {'round': 1, 'value': pot*2, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
-
-						redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
-							io.to(gameid).emit('gamestarted', {'users': [username, opponent]});
-							// digits timer
-							setTimeout(closeRound, 30*1000, gameid, 1);
-
-							// result timer
-							setTimeout(getRoundResult, 35*1000, gameid, 1);
-						});
-					} else {   // enqueue
-						socket.handshake.session.gameid = 1; // connecting
-	  					redisclient.rpush('game::BTC'+pot, username);
-	  				}
-	  			});
+  		socket.handshake.session.reload(function(err) { // update session info
+ 			var pot = data.btc;
+	  		var username = socket.handshake.session.username;
+	  		
+	  		// personal room
+			if (username && getAllRoomMembers(username).length <= 0) {
+				socket.join(username);
 			}
-		}
+
+			if (username && pot && _.contains(POTS, pot)) { // transaction
+	  			if (socket.handshake.session.gameid === 0) { // not connected
+	  				redisclient.lpop('game::BTC'+pot, function (err, res) {
+		  				if (res) { // game started
+		  					var opponent = res;
+		  					var gameid = [username, opponent].sort(function(a, b){
+									if(a < b) return -1;
+									if(a > b) return 1;
+									return 0;
+								});
+		  					gameid = JSON.stringify(gameid);
+
+		  					// join user to game room
+							socket.join(gameid);
+							socket.handshake.session.gameid = gameid; // connected
+							
+							// join opponent to game room
+							var opponentsockets = getAllRoomMembers(opponent);
+							
+							opponentsockets.forEach(function(s) {
+								s.join(gameid);
+								s.nickname = gameid;
+
+							});
+
+							// start first round
+							var satoshidigits = _.sample(DIGITS, 5);
+							var gamepot = {'round': 1, 'value': pot*2, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
+
+							redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
+								io.to(gameid).emit('gamestarted', {'users': [username, opponent]});
+								// digits timer
+								setTimeout(closeRound, 30*1000, gameid, 1);
+
+								// result timer
+								setTimeout(getRoundResult, 35*1000, gameid, 1);
+							});
+						} else {   // enqueue
+							socket.handshake.session.gameid = 1; // connecting
+		  					redisclient.rpush('game::BTC'+pot, username);
+		  				}
+		  			});				
+				}
+			}
+		});
 	});
 	
 	// select digits
