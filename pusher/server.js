@@ -183,7 +183,7 @@ app.post('/signup', function (req, res) {
 	    	} else {
 	    		// account creation
 	    		var record = {'username': username, 'password': password, 'email': email};
-	    		connection.query('INSERT INTO user SET ?', record, function(err, res){
+	    		connection.query('INSERT INTO user SET ?', record, function(err, resp){
     				response.status = true;
 	    			response.msg = 'account created successfully.';
 	    			res.json(response);
