@@ -68,13 +68,6 @@ io.use(sharedsession(sessionMiddleware, {
     autoSave:true
 }));
 
-io.use(function(socket, next){
-    socket.handshake.headers.cookie = 'sid'+"="+socket.handshake.session.id+"; path=/";
-    next();
-});
-
-
-
 // post body middleware
 var bodyParser = require('body-parser')
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -115,6 +108,7 @@ app.get('/login', function (req, res) {
 	    			req.session.username = username;
 					response.status = true;
 					response.msg = 'login successful';
+					response.username = req.session.username;
 					res.json(response);
 	    		} else{
 	    			response.status = false;
