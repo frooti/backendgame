@@ -90,6 +90,38 @@ app.get('/', function (req, res) {
 
 // LOGIN //
 
+app.get('/login', function (req, res) {
+	var response = JSON.parse(DEFAULT_RESPONSE);
+	var username = req.param('username');
+	var password = req.param('password');
+
+	if (req.session.username) {
+		response.status = true;
+		response.msg = 'login successful';
+		response.username = req.session.username;
+
+		res.json(response);
+	} else {
+		connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
+	    	if (rows) {
+	    		var spassword = rows[0].password;
+	    		if (password === spassword) {
+	    			req.session.username = username;
+					response.status = true;
+					response.msg = 'login successful';
+					res.json(response);
+	    		} else{
+	    			response.status = false;
+					response.msg = 'username or password is incorrect.';
+					res.json(response);
+	    		}
+	    	} else {
+	    		res.json(response);
+			}
+	  	});
+	 }
+});
+
 app.post('/login', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
 	var username = req.body.username;
