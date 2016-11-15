@@ -59,7 +59,7 @@ var sessionMiddleware = session({
 	rolling: true,
 	resave: true,
 	saveUninitialized: true,
-	cookie: { httpOnly: true, secure: true, domain: 'api.satoshidigits.com'}
+	cookie: { httpOnly: true}
 });
 
 app.use(sessionMiddleware);
@@ -92,8 +92,8 @@ app.get('/', function (req, res) {
 });
 
 // HELMET
-// var helmet = require('helmet');
-// app.use(helmet());
+var helmet = require('helmet');
+app.use(helmet());
 
 // CAJA - HTML sanitizer
 var sanitizer = require('sanitizer');
