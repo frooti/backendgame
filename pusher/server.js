@@ -363,13 +363,14 @@ function getAllRoomMembers(room, _nsp) {
 
 io.on('connection', function(socket){
 	console.log('a user connected');
-	socket.handshake.session.gameid = 0; // not connected
+	socket.nickname = 0; // not connected
+	//socket.handshake.session.gameid = 0; // not connected
 	socket.handshake.session.save();
 	
 	socket.on('disconnect', function(){
 		console.log('user disconnected');
 		var username = socket.handshake.session.username;
-		var gameid = socket.handshake.session.gameid;
+		var gameid = socket.nickname; // socket.handshake.session.gameid;
 		userDisconnected(gameid, username);
   	});
 
@@ -385,7 +386,7 @@ io.on('connection', function(socket){
 			}
 
 			if (username && pot && _.contains(POTS, pot)) { // transaction
-	  			if (socket.handshake.session.gameid === 0) { // not connected
+	  			if (socket.nickname === 0) { // not connected
 	  				redisclient.lpop('game::BTC'+pot, function (err, res) {
 		  				if (res) { // game started
 		  					var opponent = res;
@@ -398,8 +399,9 @@ io.on('connection', function(socket){
 
 		  					// join user to game room
 							socket.join(gameid);
-							socket.handshake.session.gameid = gameid; // connected
-							socket.handshake.session.save();
+							socket.nickname = gameid; // connected
+							//socket.handshake.session.gameid = gameid;
+							//socket.handshake.session.save();
 							
 							// join opponent to game room
 							var opponentsockets = getAllRoomMembers(opponent);
@@ -423,8 +425,9 @@ io.on('connection', function(socket){
 								setTimeout(getRoundResult, 35*1000, gameid, 1);
 							});
 						} else {   // enqueue
-							socket.handshake.session.gameid = 1; // connecting
-							socket.handshake.session.save();
+							socket.nickname = 1; // connecting
+							//socket.handshake.session.gameid = 1; // connecting
+							//socket.handshake.session.save();
 		  					redisclient.rpush('game::BTC'+pot, username);
 		  				}
 		  			});				
@@ -437,7 +440,7 @@ io.on('connection', function(socket){
 	socket.on('selectdigits', function (data) {
 		var username = socket.handshake.session.username;
 		var digits = data.digits;
-		var gameid = socket.handshake.session.gameid;
+		var gameid = socket.nickname; // socket.handshake.session.gameid;
 
 		if (username && digits && _.isEqual(_.intersection(DIGITS, digits), digits)) {
 			if (_.isString(gameid)) { // connected
@@ -456,21 +459,21 @@ io.on('connection', function(socket){
 	// next round
 	socket.on('nextround', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.handshake.session.gameid;
+		var gameid = socket.nickname; // socket.handshake.session.gameid;
 		nextRound(gameid, username);
 	});
 
 	// quit game
 	socket.on('quitgame', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.handshake.session.gameid;
+		var gameid = socket.nickname; // socket.handshake.session.gameid;
 		quitGame(gameid, username);
 	});
 
 	// game chat
 	socket.on('gamechat', function (data) {
 		var username = socket.handshake.session.username;
-		var gameid = socket.handshake.session.gameid;
+		var gameid = socket.nickname; // socket.handshake.session.gameid;
 
 		if (username && _.isString(gameid)) { // connected
 			socket.broadcast.to(gameid).emit('gamechat', data);
