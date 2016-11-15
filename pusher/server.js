@@ -134,7 +134,7 @@ app.post('/login', function (req, res) {
 		res.json(response);
 	} else {
 		connection.query('SELECT password FROM user WHERE username=?', username, function(err, rows){
-	    	if (rows) {
+	    	if (rows.length > 0) {
 	    		var spassword = rows[0].password;
 	    		if (password === spassword) {
 	    			req.session.username = username;
@@ -177,7 +177,7 @@ app.post('/signup', function (req, res) {
 	if (username && password && email) {
 		// username check
  		connection.query('SELECT username FROM user WHERE username=?', [username], function(err, rows){
-	    	if (rows) {
+	    	if (rows.length > 0) {
 	    		response.msg = 'username already exists.';
 	    		res.json(response)
 	    	} else {
