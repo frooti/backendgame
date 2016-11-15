@@ -22,17 +22,16 @@ var redisclient = redis.createClient(port=6379, host='satoshidigits-redis.sjvvfh
 
 
 // CORS
-// var cors = require('cors')
+var cors = require('cors')
 
-// var whitelist = ['https://satoshidigits.com'];
-// var corsOptions = {
-//   origin: function(origin, callback){
-//     var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-//     callback(originIsWhitelisted ? null : 'Bad Request', originIsWhitelisted);
-//   }
-// };
+var whitelist = ['https://satoshidigits.com'];
+var corsOptions = {
+	origin: 'satoshidigits.com',
+	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  	credentials: true
+};
 
-// app.use(cors());
+app.use(cors(corsOptions));
 
 // SESSION STORE
 var session = require('express-session');
