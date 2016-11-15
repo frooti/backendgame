@@ -238,6 +238,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 		console.log('nextround::'+opponent);
 
 		redisclient.hmget('game::'+gameid, 'round', 'round_status', 'result', function (err, res) {
+			console.log(res);
 			if (res.round_status === opponent) {
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
