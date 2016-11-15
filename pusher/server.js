@@ -150,6 +150,8 @@ app.post('/login', function (req, res) {
 	    		res.json(response);
 			}
 	  	});
+	 } else {
+	 	res.json(response);
 	 }
 });
 
