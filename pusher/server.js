@@ -207,6 +207,14 @@ app.post('/signup', function (req, res) {
 var POTS = [1, 0.1, 0.01, 0.001, 0.0001];
 var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+
+// online users
+function onlineUsers() {
+	var online = Object.keys(io.sockets.sockets).length;
+	io.emit('online': online);
+}
+setTimeout(onlineUsers, 30*1000);
+
 // close round
 function closeRound(gameid, round) {
 	if (gameid && round) {
