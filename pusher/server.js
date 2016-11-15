@@ -255,7 +255,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 				});				
 			} else if (res.result) {
 				// waiting for opponent to accept
-				redisclient.hset('game::'+gameid, res.round_status, username, function (err, res) {
+				redisclient.hset('game::'+gameid, 'round_status', username, function (err, res) {
 					io.to(opponent).emit('opponentstartednextround');
 				}); 
 			} 
