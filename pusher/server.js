@@ -278,6 +278,7 @@ function getRoundResult(gameid, round) {
 					result.winner = user2;
 				} else {
 					result.draw = true;
+					result.winner = 'draw';
 				}
 
 				// result declared
