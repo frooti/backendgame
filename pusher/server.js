@@ -85,7 +85,7 @@ server.listen(80, function(){
 
 app.get('/', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
-	res.json(response);
+	res.json(req.session.username);
 });
 
 // LOGIN //
