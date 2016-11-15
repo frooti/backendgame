@@ -38,14 +38,6 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-// HELMET
-var helmet = require('helmet');
-app.use(helmet());
-
-// CAJA - HTML sanitizer
-var sanitizer = require('sanitizer');
-
-
 // SESSION STORE
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
@@ -98,6 +90,13 @@ app.get('/', function (req, res) {
 	var response = JSON.parse(DEFAULT_RESPONSE);
 	res.json(req.session.username);
 });
+
+// HELMET
+var helmet = require('helmet');
+app.use(helmet());
+
+// CAJA - HTML sanitizer
+var sanitizer = require('sanitizer');
 
 // LOGIN //
 
