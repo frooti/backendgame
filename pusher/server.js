@@ -456,10 +456,13 @@ io.on('connection', function(socket){
 			if (_.isString(gameid)) { // connected
 				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 					if (res === 'open') { 
+						console.log('Round is Open');
 						redisclient.hset('game::'+gameid, username+'digits', JSON.stringify(digits), function (err, res) {
 							socket.emit('selecteddigits', {'digits': digits}); // ack
 							socket.broadcast.to(gameid).emit('opponentselecteddigits', {'digits': digits});
 						});
+					}else{
+						console.log('Round is closed: '+username+"::digits::"+digits);
 					}
 				});
 			}
