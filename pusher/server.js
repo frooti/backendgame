@@ -69,7 +69,7 @@ io.use(sharedsession(sessionMiddleware, {
 }));
 
 io.use(function(socket, next){
-    handshake.headers.cookie = 'test'+"="+'test'+"; path=/";
+    socket.handshake.headers.cookie = 'sid'+"="+socket.handshake.session.id+"; path=/";
     next();
 });
 
