@@ -199,6 +199,7 @@ app.post('/signup', function (req, res) {
 	    		// account creation
 	    		var record = {'username': username, 'password': password, 'email': email};
 	    		connection.query('INSERT INTO user SET ?', record, function(err, resp){
+    				req.session.username = sanitizer.escape(username);
     				response.status = true;
 	    			response.msg = 'account created successfully.';
 	    			response.username = username;
