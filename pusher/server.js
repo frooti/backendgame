@@ -255,10 +255,10 @@ function nextRound(gameid, username) { // race-conditon/transaction
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
 					io.to(gameid).emit('nextroundstarted', {'users': users, 'round': round+1});
 					// digits timer
-					setTimeout(closeRound, 30*1000, gameid, round+1);
+					setTimeout(closeRound, 21*1000, gameid, round+1);
 
 					// result timer
-					setTimeout(getRoundResult, 35*1000, gameid, round+1);
+					setTimeout(getRoundResult, 23*1000, gameid, round+1);
 				});				
 			} else if (res.result) {
 				// waiting for opponent to accept
@@ -447,10 +447,10 @@ io.on('connection', function(socket){
 							redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
 								io.to(gameid).emit('gamestarted', {'users': [username, opponent]});
 								// digits timer
-								setTimeout(closeRound, 30*1000, gameid, 1);
+								setTimeout(closeRound, 21*1000, gameid, 1);
 
 								// result timer
-								setTimeout(getRoundResult, 35*1000, gameid, 1);
+								setTimeout(getRoundResult, 23*1000, gameid, 1);
 							});
 						} else {   // enqueue
 							socket.nickname = 1; // connecting
