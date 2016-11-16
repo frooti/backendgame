@@ -201,6 +201,7 @@ app.post('/signup', function (req, res) {
 	    		connection.query('INSERT INTO user SET ?', record, function(err, resp){
     				response.status = true;
 	    			response.msg = 'account created successfully.';
+	    			response.username = username;
 	    			res.json(response);
     			});
 			}
