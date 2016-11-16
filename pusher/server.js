@@ -211,7 +211,7 @@ app.post('/signup', function (req, res) {
 });
 
 // GAME
-var POTS = [1, 0.1, 0.01, 0.001, 0.0001];
+var POTS = [0.2, 0.1, 0.05, 0.01, 0.001];
 var DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 
@@ -322,18 +322,17 @@ function quitGame(gameid, username) { // race-condition/transaction
 
 		redisclient.hget('game::'+gameid, 'result', function (err, res) {
 			if (res.result) {
-				// quit game
-				io.to(gameid).emit('gamestopped');
-				// leave room and socket.handshake.session.gameid = undefined
+				redisclient.hdel('game::'+gameid, function (err, res) {
+					// quit game
+					io.to(gameid).emit('gamestopped');
+					// leave room and socket.handshake.session.gameid = undefined
 
-				var gamesockets = getAllRoomMembers(gameid);
-				gamesockets.forEach(function(s){
-					s.nickname = 0;
-					s.leave(gameid);
-				});
-				// redisclient.hdel('game::'+gameid, function (err, res) {
-					
-				// }); 
+					var gamesockets = getAllRoomMembers(gameid);
+					gamesockets.forEach(function(s){
+						s.nickname = 0;
+						s.leave(gameid);
+					});	
+				}); 
 			}
 		});
 	}
