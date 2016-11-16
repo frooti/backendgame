@@ -321,7 +321,7 @@ function quitGame(gameid, username) { // race-condition/transaction
 		var opponent = _.difference(users, [username])[0];
 
 		redisclient.hget('game::'+gameid, 'result', function (err, res) {
-			if (res.result) {
+			if (res) {
 				redisclient.hdel('game::'+gameid, function (err, res) {
 					// quit game
 					io.to(gameid).emit('gamestopped');
