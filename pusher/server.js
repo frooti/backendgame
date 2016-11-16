@@ -353,26 +353,23 @@ function userDisconnected(gameid, username) { // race-condition/transaction
     		console.log(replies);
 		});
 	} else { // connected (clean)
-		// var users = JSON.parse(gameid);
-		// var opponent = _.difference(users, [username])[0];
+		var users = JSON.parse(gameid);
+		var opponent = _.difference(users, [username])[0];
 
-		// io.to(gameid).emit('playerdisconnected', {'username': username});
+		//io.to(gameid).emit('playerdisconnected', {'username': username});
 		// // leave room and socket.handshake.session.gameid = 0
 
-		// var gamesockets = getAllRoomMembers(gameid); 
-		// gamesockets.forEach(function(s){
-		// 	s.nickname = 0; // not connected
-		// 	s.leave(gameid);
-		// });
-
-		// // delete pot data if result declared
-		// redisclient.hget('game::'+gameid, 'result', function (err, res) {
-		// 	if (res.result) { // round result declared
-		// 		redisclient.del('game::'+gameid, function (err, res) {
-					
-		// 		}); 
-		// 	}
-		// });
+		var gamesockets = getAllRoomMembers(gameid); 
+		if (gamesockets.length <2) {
+			// delete pot data on disconnection
+			redisclient.del('game::'+gameid, function (err, res) {
+				io.to(gameid).emit('gamestopped');
+				gamesockets.forEach(function(s) {
+					s.nickname = 0; // not connected
+					s.leave(gameid);					
+				});
+			});		
+		}
 	}
 }
 
