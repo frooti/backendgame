@@ -307,6 +307,18 @@ function getRoundResult(gameid, round) {
 				// result declared
 				redisclient.hset('game::'+gameid, 'result', result.winner, function (err, res) {
 					io.to(gameid).emit('roundresult', result);
+					//  check opponent connection
+					var gamesockets = getAllRoomMembers(gameid);
+					// delete pot data on disconnection
+					if (gamesockets.length < 2) { 
+						redisclient.del('game::'+gameid, function (err, res) {
+							io.to(gameid).emit('gamestopped');
+							gamesockets.forEach(function(s) {
+								s.nickname = 0; // not connected
+								s.leave(gameid);					
+							});
+						});
+					}
 					delete result.satoshidigits;
 					io.emit('results', result);
 				});
@@ -358,18 +370,19 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 
 		//io.to(gameid).emit('playerdisconnected', {'username': username});
 		// // leave room and socket.handshake.session.gameid = 0
-
-		var gamesockets = getAllRoomMembers(gameid); 
-		if (gamesockets.length == 1) {
-			// delete pot data on disconnection
-			redisclient.del('game::'+gameid, function (err, res) {
-				io.to(gameid).emit('gamestopped');
-				gamesockets.forEach(function(s) {
-					s.nickname = 0; // not connected
-					s.leave(gameid);					
-				});
-			});		
-		}
+		redisclient.hget('game::'+gameid, 'result', function (err, res){
+			if (result) {
+				var gamesockets = getAllRoomMembers(gameid);
+				// delete pot data on disconnection
+				redisclient.del('game::'+gameid, function (err, res) {
+					io.to(gameid).emit('gamestopped');
+					gamesockets.forEach(function(s) {
+						s.nickname = 0; // not connected
+						s.leave(gameid);					
+					});
+				});	
+			}
+		});
 	}
 }
 
