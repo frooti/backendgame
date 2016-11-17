@@ -83,7 +83,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.use(express.static(__dirname+'/static'));
 
 server.listen(80, function(){
-	console.log('listening on *:80');
+	//console.log('listening on *:80');
 });
 
 app.get('/', function (req, res) {
@@ -231,7 +231,7 @@ function closeRound(gameid, round) {
 			if (res && parseInt(res) === parseInt(round)) {
 				redisclient.hset('game::'+gameid, 'round_status', 'closed', function (err, res) {
 					io.to(gameid).emit('roundclosed', {'round': round});
-					console.log('roundclosed');
+					//console.log('roundclosed');
 				});
 			}
 		});
@@ -364,7 +364,7 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 			multi.lrem('game::BTC'+pot, 1, username);
 		});
 		multi.exec(function (err, replies) {
-    		console.log(replies);
+    		//console.log(replies);
 		});
 	} else { // connected (clean)
 		var users = JSON.parse(gameid);
@@ -374,7 +374,7 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 		// // leave room and socket.handshake.session.gameid = 0
 		redisclient.hget('game::'+gameid, 'result', function (err, result){
 			if (result) {
-				console.log('disconnecting::'+result);
+				//console.log('disconnecting::'+result);
 				var gamesockets = getAllRoomMembers(gameid);
 				// delete pot data on disconnection
 				redisclient.del('game::'+gameid, function (err, res) {
@@ -405,13 +405,13 @@ function getAllRoomMembers(room, _nsp) {
 }
 
 io.on('connection', function(socket){
-	console.log('a user connected');
+	//console.log('a user connected');
 	socket.nickname = 0; // not connected
 	//socket.handshake.session.gameid = 0; // not connected
 	socket.handshake.session.save();
 	
 	socket.on('disconnect', function(){
-		console.log('user disconnected');
+		//console.log('user disconnected');
 		var username = socket.handshake.session.username;
 		var gameid = socket.nickname; // socket.handshake.session.gameid;
 		userDisconnected(gameid, username);
@@ -484,19 +484,19 @@ io.on('connection', function(socket){
 		var username = socket.handshake.session.username;
 		var digits = data.digits;
 		var gameid = socket.nickname; // socket.handshake.session.gameid;
-		console.log('selecteddigits::username::'+username+'::digits::'+digits);
+		//console.log('selecteddigits::username::'+username+'::digits::'+digits);
 
 		if (username && digits && _.difference(_.intersection(DIGITS, digits), digits).length == 0) {
 			if (_.isString(gameid)) { // connected
 				redisclient.hget('game::'+gameid, 'round_status', function (err, res) {
 					if (res === 'open') { 
-						console.log('Round is Open');
+						//console.log('Round is Open');
 						redisclient.hset('game::'+gameid, username+'digits', JSON.stringify(digits), function (err, res) {
 							socket.emit('selecteddigits', {'digits': digits}); // ack
 							socket.broadcast.to(gameid).emit('opponentselecteddigits', {'digits': digits});
 						});
 					}else{
-						console.log('Round is closed: '+username+"::digits::"+digits);
+						//console.log('Round is closed: '+username+"::digits::"+digits);
 					}
 				});
 			}
