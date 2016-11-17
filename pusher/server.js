@@ -336,7 +336,7 @@ function quitGame(gameid, username) { // race-condition/transaction
 
 		redisclient.hget('game::'+gameid, 'result', function (err, res) {
 			if (res) {
-				redisclient.hdel('game::'+gameid, function (err, res) {
+				redisclient.del('game::'+gameid, function (err, res) {
 					// quit game
 					io.to(gameid).emit('gamestopped');
 					// leave room and socket.handshake.session.gameid = undefined
