@@ -251,7 +251,7 @@ function nextRound(gameid, username) { // race-conditon/transaction
 				// started next round
 				var satoshidigits = _.sample(DIGITS, 5);
 				var round = parseInt(res.round);
-				var gamepot = {'round': round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open'};
+				var gamepot = {'round': round+1, 'satoshidigits':JSON.stringify(satoshidigits), 'round_status': 'open', 'result': undefined};
 				gamepot[username+'digits'] = JSON.stringify([]);
 				gamepot[opponent+'digits'] = JSON.stringify([]);
 				redisclient.hmset('game::'+gameid, gamepot, function (err, res) {
