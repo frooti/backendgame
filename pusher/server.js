@@ -370,7 +370,7 @@ function userDisconnected(gameid, username) { // race-condition/transaction
 
 		//io.to(gameid).emit('playerdisconnected', {'username': username});
 		// // leave room and socket.handshake.session.gameid = 0
-		redisclient.hget('game::'+gameid, 'result', function (err, res){
+		redisclient.hget('game::'+gameid, 'result', function (err, result){
 			if (result) {
 				var gamesockets = getAllRoomMembers(gameid);
 				// delete pot data on disconnection
